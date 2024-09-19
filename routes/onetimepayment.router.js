@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addCard, chargeCustomer, checkCustomerByEmail, createCustomer, generateToken, retrieveCustomer } from "../controllers/onetimepayment.controller.js";
+import { addCard, chargeCustomer, checkCustomerByEmail, createCustomer, generateToken, getallcustomer, retrieveCustomer } from "../controllers/onetimepayment.controller.js";
 const router = Router();
 
 
@@ -10,5 +10,6 @@ router.route("/retrievecustomer/:customer_id").get(retrieveCustomer);
 router.route("/generatetoken").get(generateToken);
 router.route("/addcard").post(addCard);
 router.route("/chargecustomer").post(chargeCustomer);
+router.route("/getallcustomer").get(getallcustomer);
 
 export default router;

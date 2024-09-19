@@ -256,3 +256,24 @@ export const chargeCustomer = async (req, res) => {
     });
   }
 };
+
+
+// get all customer
+export const getallcustomer=async (req, res) => {
+  try {
+    // List all customers
+    const customers = await stripe.customers.list({
+      limit: 10, // Adjust the limit as needed
+    });
+
+    res.status(200).json({
+      message: 'Customers retrieved successfully',
+      customers: customers.data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error retrieving customers',
+      error: error.message,
+    });
+  }
+};
