@@ -10,6 +10,46 @@
       <label for="customer-id">Customer ID:</label>
       <input type="text" id="customer-id" placeholder="Enter customer ID" required>
     </div>
+    <div>
+      <label for="billing-address">Billing Address:</label>
+      <input type="text" id="billing-address" placeholder="Enter billing address" required>
+    </div>
+    <div>
+      <label for="billing-city">Billing City:</label>
+      <input type="text" id="billing-city" placeholder="Enter billing city" required>
+    </div>
+    <div>
+      <label for="billing-state">Billing State:</label>
+      <input type="text" id="billing-state" placeholder="Enter billing state" required>
+    </div>
+    <div>
+      <label for="billing-postal-code">Billing Postal Code:</label>
+      <input type="text" id="billing-postal-code" placeholder="Enter billing postal code" required>
+    </div>
+    <div>
+      <label for="billing-country">Billing Country:</label>
+      <input type="text" id="billing-country" placeholder="Enter billing country" required>
+    </div>
+    <div>
+      <label for="shipping-address">Shipping Address:</label>
+      <input type="text" id="shipping-address" placeholder="Enter shipping address" required>
+    </div>
+    <div>
+      <label for="shipping-city">Shipping City:</label>
+      <input type="text" id="shipping-city" placeholder="Enter shipping city" required>
+    </div>
+    <div>
+      <label for="shipping-state">Shipping State:</label>
+      <input type="text" id="shipping-state" placeholder="Enter shipping state" required>
+    </div>
+    <div>
+      <label for="shipping-postal-code">Shipping Postal Code:</label>
+      <input type="text" id="shipping-postal-code" placeholder="Enter shipping postal code" required>
+    </div>
+    <div>
+      <label for="shipping-country">Shipping Country:</label>
+      <input type="text" id="shipping-country" placeholder="Enter shipping country" required>
+    </div>
     <div id="card-element"></div>
     <button type="submit">Add Card</button>
     <div id="error-message"></div>
@@ -24,18 +64,40 @@
     document.getElementById('payment-form').addEventListener('submit', async (event) => {
       event.preventDefault();
 
-      // Retrieve the customer ID from the input field
       const customerId = document.getElementById('customer-id').value;
+
+      const billingDetails = {
+        address: {
+          line1: document.getElementById('billing-address').value,
+          city: document.getElementById('billing-city').value,
+          state: document.getElementById('billing-state').value,
+          postal_code: document.getElementById('billing-postal-code').value,
+          country: document.getElementById('billing-country').value,
+        },
+      };
+
+      const shippingDetails = {
+        address: {
+          line1: document.getElementById('shipping-address').value,
+          city: document.getElementById('shipping-city').value,
+          state: document.getElementById('shipping-state').value,
+          postal_code: document.getElementById('shipping-postal-code').value,
+          country: document.getElementById('shipping-country').value,
+        },
+        name: 'Recipient Name', // Update with actual recipient name if needed
+        phone: '+1234567890', // Update with actual phone number if needed
+      };
 
       const { paymentMethod, error } = await stripe.createPaymentMethod({
         type: 'card',
         card: card,
+        billing_details: billingDetails,
       });
 
       if (error) {
         document.getElementById('error-message').textContent = error.message;
       } else {
-        // Send paymentMethod.id and customerId to your server
+        // Send paymentMethod.id, customerId, and other details to your server
         fetch('/api/v1/onetimepayment/addcard', {
           method: 'POST',
           headers: {
@@ -43,7 +105,9 @@
           },
           body: JSON.stringify({
             paymentMethodId: paymentMethod.id,
-            customerId: customerId, // Include the customer ID
+            customerId: customerId,
+            billingDetails: billingDetails,
+            shippingDetails: shippingDetails,
           }),
         }).then(response => response.json())
           .then(data => console.log(data))
