@@ -101,3 +101,60 @@ export const retrieveCustomer = async (req, res) => {
     });
   }
 };
+
+
+// create token for add card [generally created from client side] 
+//! we can directly  get token from  stripe card on client side just pass to charge for payment
+export const generateToken=async(req,res)=>{
+// [this not supported on server side ] only works on client side
+  // const { cardNumber, expMonth, expYear, cvc } = req.body;
+
+  // try {
+  //   // Create a card token using the test card details
+  //   const token = await stripe.tokens.create({
+  //     card: {
+  //       number: "4242424242424242",
+  //       exp_month: 2,
+  //       exp_year: 2028,
+  //       cvc: 456,
+  //     },
+  //   });
+
+  //   res.status(200).json({
+  //     message: 'Card token created successfully',
+  //     token: token.id,
+  //   });
+  // } catch (error) {
+  //   res.status(500).json({
+  //     message: 'Error creating card token',
+  //     error: error.message,
+  //   });
+  // }
+
+
+
+  // bank account is used for server token generate
+  try {
+    const token = await stripe.tokens.create({
+      bank_account: {
+        country: 'US',
+        currency: 'usd',
+        account_holder_name: 'Jenny Rosen',
+        account_holder_type: 'individual',
+        routing_number: '110000000',
+        account_number: '000123456789',
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Bank account token created successfully',
+      data: token,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Error creating bank account token',
+      error: error.message,
+    });
+  }
+}
+
