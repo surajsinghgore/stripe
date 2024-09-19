@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stripe Payment Method</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <form id="payment-form">
+    <div>
+      <label for="customer-id">Customer ID:</label>
+      <input type="text" id="customer-id" placeholder="Enter customer ID" required>
+    </div>
+    <div id="card-element"></div>
+    <button type="submit">Add Card</button>
+    <div id="error-message"></div>
+  </form>
+
+  <script>
+    const stripe = Stripe('pk_test_51MqytpSIxYvI6KRaTrXgLDjIfJHkQnlsSvCiWqSDkLJninaYS0p1MID7XKiKCjnk6oc5usdJb43oTtWx2z5OMHvt00mmXOiAVr'); // Replace with your publishable key
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
+
+    document.getElementById('payment-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Retrieve the customer ID from the input field
+      const customerId = document.getElementById('customer-id').value;
+
+      const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: card,
+      });
+
+      if (error) {
+        document.getElementById('error-message').textContent = error.message;
+      } else {
+        // Send paymentMethod.id and customerId to your server
+        fetch('/api/v1/onetimepayment/addcard', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            paymentMethodId: paymentMethod.id,
+            customerId: customerId, // Include the customer ID
+          }),
+        }).then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error(error));
+      }
+    });
+  </script>
+</body>
+</html>

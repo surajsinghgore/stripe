@@ -158,3 +158,65 @@ export const generateToken=async(req,res)=>{
   }
 }
 
+// add card to customer
+export const addCard = async (req, res) => {
+  const { customerId, paymentMethodId } = req.body;
+
+  if (!customerId || !paymentMethodId) {
+    return res.status(400).json({
+      message: 'Missing customerId or paymentMethodId',
+    });
+  }
+
+  try {
+    // Check if the customer exists
+    const customer = await stripe.customers.retrieve(customerId);
+
+    // If the customer does not exist, an error will be thrown
+    if (!customer || customer.deleted) {
+      return res.status(404).json({
+        message: 'Customer not found',
+      });
+    }
+
+    // Attach the payment method to the customer
+    const paymentMethod = await stripe.paymentMethods.attach(paymentMethodId, {
+      customer: customerId,
+    });
+
+    // Optionally, set this payment method as the default payment method for invoices
+    await stripe.customers.update(customerId, {
+      invoice_settings: {
+        default_payment_method: paymentMethodId,
+      },
+    });
+
+    res.status(200).json({
+      message: 'Payment method added to customer successfully',
+      paymentMethod: paymentMethod,
+    });
+  } catch (error) {
+    // Handle specific errors
+    if (error.type === 'StripeInvalidRequestError') {
+      return res.status(400).json({
+        message: 'Invalid request',
+        error: error.message,
+      });
+    } else if (error.type === 'StripeAPIError') {
+      return res.status(502).json({
+        message: 'Stripe API error',
+        error: error.message,
+      });
+    } else if (error.type === 'StripeCardError') {
+      return res.status(402).json({
+        message: 'Card error',
+        error: error.message,
+      });
+    }
+
+    res.status(500).json({
+      message: 'Error adding payment method to customer',
+      error: error.message,
+    });
+  }
+};
