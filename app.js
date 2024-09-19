@@ -5,7 +5,7 @@ const app = express();
 // Middlewares
 //   app.use(cookieParser());
 
-
+app.use(express.json());
 
 
 // Routes import
