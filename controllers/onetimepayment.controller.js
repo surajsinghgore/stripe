@@ -220,3 +220,39 @@ export const addCard = async (req, res) => {
     });
   }
 };
+
+
+
+
+// charge money from customer 
+export const chargeCustomer = async (req, res) => {
+  const { customerId, amount, currency, paymentMethodId } = req.body;
+
+  if (!customerId || !amount || !currency || !paymentMethodId) {
+    return res.status(400).json({
+      message: 'Missing required fields: customerId, amount, currency, or paymentMethodId',
+    });
+  }
+
+  try {
+    // Create a payment intent to charge the customer
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount, // Amount in smallest currency unit, e.g., cents for USD
+      currency: currency,
+      customer: customerId,
+      payment_method: paymentMethodId,
+      off_session: true, // Charge customer without them being on session
+      confirm: true, // Confirm payment right away
+    });
+
+    res.status(200).json({
+      message: 'Charge successful',
+      paymentIntent: paymentIntent,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error charging customer',
+      error: error.message,
+    });
+  }
+};
